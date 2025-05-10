@@ -1,0 +1,24 @@
+{% extends "yonetim/base_yonetim.html" %}
+{% load static humanize %}
+
+{% block title %}Gider Sil Onayı - {{ site.ad }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'yonetim:panel' %}">Panel</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'yonetim:panel' %}#siteGiderListesiPane">Site Gider Listesi</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Gider Sil Onayı</li>
+        </ol>
+    </nav>
+    <h2>Gider Silme Onayı</h2>
+    <hr>
+    <p>"{{ gider.tur }} - {{ gider.tutar|intcomma }} TL ({{ gider.tarih|date:"d F Y" }})" başlıklı gideri silmek istediğinizden emin misiniz?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Evet, Sil</button>
+        <a href="{% url 'yonetim:panel' %}#siteGiderListesiPane" class="btn btn-secondary">Hayır, İptal</a>
+    </form>
+</div>
+{% endblock %}

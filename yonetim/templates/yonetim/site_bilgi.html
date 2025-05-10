@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+        {% if is_read_only %}Site Bilgileri{% else %}{% if is_yeni_site %}Yeni Site Kurulumu{% else %}{{ site.ad|default:"Site Yönetimi" }} - Bilgileri Düzenle{% endif %}{% endif %}
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Giriş sayfasındaki ana tema rengi (#6c63ff) ile uyumlu stil */
+        body { background-color: #f4feff; font-family: "Segoe UI", sans-serif; padding-top: 20px; padding-bottom: 40px; }
+        .site-info-container { max-width: 850px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 25px 35px; }
+        .site-title-display { font-weight: 600; text-align: center; margin-bottom: 30px; color: #343a40; font-size: 1.9rem; }
+        .form-label { font-weight: 500; color: #495057; font-size: 0.9rem; margin-bottom: 0.3rem; }
+        .form-control, .form-select { border-radius: 0.3rem; font-size: 0.95rem; padding: 0.5rem 0.75rem; }
+        .form-control:focus, .form-select:focus { border-color: #6c63ff; box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25); } /* Tema rengi */
+        .btn-primary { background-color: #6c63ff; border-color: #6c63ff; padding: 0.6rem 1.2rem; font-weight: 500; } /* Tema rengi */
+        .btn-primary:hover { background-color: #574fd6; border-color: #574fd6; } /* Tema rengi koyu tonu */
+        .btn-secondary { padding: 0.6rem 1.2rem; font-weight: 500; }
+        .btn-danger { font-size: 0.8rem; padding: 0.25rem 0.6rem; }
+        .blok-row { border: 1px solid #e9ecef; padding: 15px; border-radius: 6px; background-color: #fdfdff; margin-bottom: 15px; }
+        hr { margin-top: 2rem; margin-bottom: 2rem; }
+        .form-text{ font-size: 0.8rem; }
+        .section-title { color: #574fd6; border-bottom: 2px solid #e0e0ff; padding-bottom: 0.5rem; margin-bottom: 1.5rem; font-weight: 500; } /* Tema rengi koyu tonu */
+        
+        /* Salt okunur mod için ek stiller (isteğe bağlı, disabled zaten çoğu şeyi halleder) */
+        .form-control:disabled, .form-select:disabled {
+            background-color: #e9ecef; /* Disabled alanlar için Bootstrap varsayılanı */
+            opacity: 0.8; /* Biraz daha soluk görünüm */
+        }
+    </style>
+</head>
+<body>
+    <div class="site-info-container">
+        <h2 class="site-title-display">
+            {% if is_read_only %}
+                {{ site.ad|default:"Bilinmeyen Site" }} - Site Bilgileri
+            {% else %}
+                {% if is_yeni_site %}Yeni Site Kurulumu{% else %}{{ site.ad|default:"Bilinmeyen Site" }} - Bilgileri Düzenle{% endif %}
+            {% endif %}
+        </h2>
+        
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" id="siteForm">
+            {% csrf_token %}
+            
+            <h4 class="section-title">Genel Site Bilgileri</h4>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="site_adi_input" class="form-label">Site Adı {% if not is_read_only %}<span class="text-danger">*</span>{% endif %}</label>
+                    <input type="text" name="site_adi" id="site_adi_input" class="form-control" placeholder="Örn: Huzur Sitesi" {% if not is_read_only %}required{% endif %} value="{{ form_data.ad|default_if_none:'' }}" {% if is_read_only %}disabled{% endif %} />
+                </div>
+                <div class="col-md-6">
+                    <label for="site_kodu_display" class="form-label">Site Kodu (Değiştirilemez)</label>
+                    <input type="text" name="site_kodu_display" id="site_kodu_display" class="form-control" value="{{ form_data.kod|default_if_none:'' }}" readonly disabled /> {# Her zaman disabled ve readonly #}
+                    {% if not is_read_only %}
+                    <div class="form-text">Bu kod, sakinlerin sitenize kaydolması için kullanılacaktır.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="site_adresi" class="form-label">Site Adresi {% if not is_read_only %}<span class="text-danger">*</span>{% endif %}</label>
+                <input type="text" name="site_adresi" id="site_adresi" class="form-control" placeholder="Örn: Örnek Mah. Test Cad. No:123" {% if not is_read_only %}required{% endif %} value="{{ form_data.adres|default_if_none:'' }}" {% if is_read_only %}disabled{% endif %} />
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="yonetici_tel" class="form-label">Yönetici Telefonu (Opsiyonel)</label>
+                    <input type="text" name="yonetici_tel" id="yonetici_tel" class="form-control" placeholder="Örn: 5551234567" value="{{ form_data.yonetici_tel|default_if_none:'' }}" {% if is_read_only %}disabled{% endif %} />
+                </div>
+                <div class="col-md-6">
+                    <label for="aidat_miktari" class="form-label">Aylık Standart Aidat Tutarı (₺) (Opsiyonel)</label>
+                    <input type="number" name="aidat_miktari" id="aidat_miktari" class="form-control" placeholder="Örn: 250.00" step="0.01" value="{{ form_data.aidat_miktari|default_if_none:''|stringformat:'.2f' }}" {% if is_read_only %}disabled{% endif %} />
+                </div>
+            </div>
+            
+            {% if not is_yeni_site and site and request.user.is_yonetici %} {# Sadece yönetici kendi dairesini atayabilir #}
+            <hr>
+            <h4 class="section-title">Yönetici Daire Ataması (Opsiyonel)</h4>
+            <div class="mb-3">
+                <label for="yonetici_daire_secimi" class="form-label">
+                    Yönetici olarak bu sitede bir daireniz varsa seçin:
+                    {% if yoneticinin_mevcut_dairesi_id %}
+                        {% for daire_obj in sitedeki_bos_ve_yoneticiye_ait_daireler %}
+                            {% if daire_obj.id == yoneticinin_mevcut_dairesi_id %}
+                                <span class="badge bg-primary text-white ms-2">Mevcut: {{ daire_obj.blok.ad|upper }} - Daire {{ daire_obj.daire_no }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    {% elif sitedeki_bos_ve_yoneticiye_ait_daireler|length == 0 %}
+                         <span class="badge bg-warning text-dark ms-2">Sitede size atanabilecek boş daire bulunmamaktadır.</span>
+                    {% endif %}
+                </label>
+                <select name="yonetici_daire_secimi" id="yonetici_daire_secimi" class="form-select" {% if is_read_only or (not sitedeki_bos_ve_yoneticiye_ait_daireler and not yoneticinin_mevcut_dairesi_id) %}disabled{% endif %}>
+                    <option value="bos_birak">-- Daire Atamasını Kaldır / Daire Seçme --</option>
+                    {% for daire_secim in sitedeki_bos_ve_yoneticiye_ait_daireler %}
+                        <option value="{{ daire_secim.id }}" {% if daire_secim.id == yoneticinin_mevcut_dairesi_id %}selected{% endif %}>
+                            {{ daire_secim.blok.ad|upper }} - Daire {{ daire_secim.daire_no }}
+                            {% if daire_secim.kullanici == request.user %} (Size Ait)
+                            {% else %} (Boş)
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if not is_read_only %}
+                <div class="form-text">
+                    Bu sitede bir dairede ikamet ediyorsanız seçebilirsiniz. Seçtiğiniz daire size atanacaktır. Sadece boş veya size ait olanları seçebilirsiniz.
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <hr>
+            <h4 class="section-title">Blok ve Daire Yapılandırması</h4>
+            <div id="bloklar-container">
+                {% for blok_form_item in bloklar_ve_daireleri %}
+                <div class="row mb-3 blok-row align-items-end">
+                    <input type="hidden" name="blok_id[]" value="{{ blok_form_item.id|default:'' }}" {% if is_read_only %}disabled{% endif %}>
+                    <div class="col-md-5">
+                        <label class="form-label">Blok Adı {% if not is_read_only %}<span class="text-danger">*</span>{% endif %}</label>
+                        <input type="text" name="blok_adi[]" class="form-control" placeholder="Örn: A BLOK" {% if not is_read_only %}required{% endif %} value="{{ blok_form_item.ad|default:''|upper }}" {% if is_read_only %}disabled{% endif %} />
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Bu Bloktaki Daire Sayısı {% if not is_read_only %}<span class="text-danger">*</span>{% endif %}</label>
+                        <input type="number" name="daire_sayisi[]" class="form-control" placeholder="Örn: 10" min="1" {% if not is_read_only %}required{% endif %} value="{{ blok_form_item.daire_sayisi|default:'' }}" {% if is_read_only %}disabled{% endif %} />
+                    </div>
+                    {% if not is_read_only %}
+                    <div class="col-md-2 pt-3">
+                        <button type="button" class="btn btn-danger w-100 remove-blok" onclick="removeBlok(this)">Kaldır</button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                  {% if not is_read_only %} {# Sadece yönetici yeni blok ekleyebilsin diye ilk boş satırı göster #}
+                    <div class="row mb-3 blok-row align-items-end">
+                        <input type="hidden" name="blok_id[]" value="">
+                        <div class="col-md-5">
+                            <label class="form-label">Blok Adı <span class="text-danger">*</span></label>
+                            <input type="text" name="blok_adi[]" class="form-control" placeholder="Örn: A BLOK" required />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Bu Bloktaki Daire Sayısı <span class="text-danger">*</span></label>
+                            <input type="number" name="daire_sayisi[]" class="form-control" placeholder="Örn: 10" min="1" required />
+                        </div>
+                        <div class="col-md-2 pt-3">
+                             <button type="button" class="btn btn-danger w-100 remove-blok" onclick="removeBlok(this)" style="display: none;">Kaldır</button>
+                        </div>
+                    </div>
+                  {% else %}
+                    <p class="text-muted">Bu sitede henüz blok ve daire yapılandırması yapılmamış.</p>
+                  {% endif %}
+                {% endfor %}
+            </div>
+            {% if not is_read_only %}
+            <div class="mb-3">
+                <button type="button" class="btn btn-outline-secondary w-100" id="add-blok"><i class="fas fa-plus me-2"></i>Yeni Blok Ekle</button>
+            </div>
+            {% endif %}
+            <hr>
+            <div class="d-grid gap-2">
+                {% if not is_read_only %}
+                <button type="submit" class="btn btn-primary btn-lg">
+                    {% if is_yeni_site %}SİTEYİ OLUŞTUR VE BİLGİLERİ KAYDET{% else %}BİLGİLERİ GÜNCELLE{% endif %}
+                </button>
+                {% endif %}
+                {# Panele Dön butonu her zaman görünür olsun #}
+                <a href="{% url 'yonetim:panel' %}" class="btn btn-secondary {% if is_read_only %}btn-lg{% endif %}">Panele Dön</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% if not is_read_only %} {# JavaScript sadece düzenleme modunda gerekli #}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function updateBlokAdInput(inputElement) {
+                if (inputElement && inputElement.name === 'blok_adi[]') {
+                    inputElement.value = inputElement.value.toUpperCase();
+                }
+            }
+            document.getElementById('bloklar-container').addEventListener('input', function(event) {
+                updateBlokAdInput(event.target);
+            });
+            document.querySelectorAll("input[name='blok_adi[]']").forEach(updateBlokAdInput);
+
+            function toggleFirstRemoveButton() {
+                var blokRows = document.querySelectorAll(".blok-row");
+                blokRows.forEach(function(row, index) {
+                    var removeButton = row.querySelector('.remove-blok');
+                    if (removeButton) {
+                        removeButton.style.display = (blokRows.length > 1) ? 'block' : 'none';
+                    }
+                });
+            }
+            toggleFirstRemoveButton();
+
+            document.getElementById("add-blok").onclick = function () {
+                var container = document.getElementById("bloklar-container");
+                var newBlokRow = document.createElement("div");
+                newBlokRow.className = "row mb-3 blok-row align-items-end";
+                newBlokRow.innerHTML = `
+                    <input type="hidden" name="blok_id[]" value="">
+                    <div class="col-md-5">
+                        <label class="form-label">Blok Adı <span class="text-danger">*</span></label>
+                        <input type="text" name="blok_adi[]" class="form-control" placeholder="Örn: B BLOK" required />
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Bu Bloktaki Daire Sayısı <span class="text-danger">*</span></label>
+                        <input type="number" name="daire_sayisi[]" class="form-control" placeholder="Örn: 8" min="1" required />
+                    </div>
+                    <div class="col-md-2 pt-3">
+                        <button type="button" class="btn btn-danger w-100 remove-blok" onclick="removeBlok(this)">Kaldır</button>
+                    </div>
+                `;
+                container.appendChild(newBlokRow);
+                var newBlokAdInput = newBlokRow.querySelector("input[name='blok_adi[]']");
+                if (newBlokAdInput) {
+                   newBlokAdInput.addEventListener('input', function(event) {
+                       updateBlokAdInput(event.target);
+                   });
+                }
+                toggleFirstRemoveButton();
+            };
+        });
+
+        function removeBlok(buttonEl) {
+            buttonEl.closest(".blok-row").remove();
+            var blokRows = document.querySelectorAll(".blok-row");
+            blokRows.forEach(function(row, index) {
+                var removeButton = row.querySelector('.remove-blok');
+                if (removeButton) {
+                    removeButton.style.display = (blokRows.length > 1) ? 'block' : 'none';
+                }
+            });
+        }
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,35 @@
+{% extends "yonetim/base_yonetim.html" %} {# Eğer bir base template'iniz varsa, yoksa standart HTML yapısı kullanın #}
+{% load static humanize %}
+
+{% block title %}{% if gider %}Gider Düzenle{% else %}Yeni Gider Ekle{% endif %} - {{ site.ad }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'yonetim:panel' %}">Panel</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% if gider %}Gider Düzenle{% else %}Yeni Gider Ekle{% endif %}</li>
+        </ol>
+    </nav>
+
+    <h2>{% if gider %}Gider Düzenle{% else %}Yeni Gider Ekle{% endif %}</h2>
+    <hr>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">{% if gider %}Güncelle{% else %}Kaydet{% endif %}</button>
+        <a href="{% url 'yonetim:panel' %}#siteGiderListesiPane" class="btn btn-secondary">İptal</a>
+    </form>
+</div>
+{% endblock %}

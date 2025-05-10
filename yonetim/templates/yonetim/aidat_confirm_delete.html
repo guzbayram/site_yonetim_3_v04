@@ -1,0 +1,33 @@
+{% extends "yonetim/base_yonetim.html" %}
+{% load static humanize %}
+
+{% block title %}Aidat Sil Onayı - {{ daire.daire_tam_adi }} - {{ site.ad }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'yonetim:panel' %}">Panel</a></li>
+             {% if request.GET.from_panel %}
+            <li class="breadcrumb-item"><a href="{% url 'yonetim:panel' %}#daireAidatDetayListesiPane">Daire Aidat Detay Listesi</a></li>
+            {% else %}
+            <li class="breadcrumb-item"><a href="{% url 'yonetim:daire_odeme_detay' daire_id=daire.id %}">{{ daire.daire_tam_adi }} Ödeme Detayları</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">Aidat Sil Onayı</li>
+        </ol>
+    </nav>
+    <h2>Aidat Kaydı Silme Onayı</h2>
+    <hr>
+    <p><strong>Daire:</strong> {{ daire.daire_tam_adi }}</p>
+    <p>"{{ aidat.tutar|intcomma }} TL - {{ aidat.tarih|date:"d F Y" }}" tutarındaki aidat kaydını silmek istediğinizden emin misiniz?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Evet, Sil</button>
+        {% if request.GET.from_panel %}
+        <a href="{% url 'yonetim:panel' %}#daireAidatDetayListesiPane" class="btn btn-secondary">Hayır, İptal</a>
+        {% else %}
+        <a href="{% url 'yonetim:daire_odeme_detay' daire_id=daire.id %}" class="btn btn-secondary">Hayır, İptal</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

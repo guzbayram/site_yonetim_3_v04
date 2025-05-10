@@ -1,0 +1,180 @@
+{% load humanize static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ daire_nesnesi.daire_tam_adi }} - Ödeme Detayları - {{ site.ad }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --theme-primary-purple: #6a0dad;
+            --theme-light-purple-accent: #8344c2;
+            --theme-very-light-purple-bg: #f5efff;
+            --text-green: #28a745;
+            --text-red: #dc3545;
+        }
+        body {
+            background: var(--theme-very-light-purple-bg);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 70px; /* Navbar için */
+        }
+        .navbar { background-color: var(--theme-primary-purple); }
+        .navbar .navbar-brand, .navbar .nav-link { color: #fff; }
+        .navbar .nav-link:hover { color: #e0e0e0; }
+        .container-detay { margin-top: 20px; }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: none;
+        }
+        .card-header {
+            background-color: var(--theme-light-purple-accent);
+            color: white;
+            font-weight: 500;
+        }
+        .summary-item {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .summary-item strong.text-positive { color: var(--text-green); }
+        .summary-item strong.text-negative { color: var(--text-red); }
+        .summary-item strong { color: var(--theme-primary-purple); } /* Varsayılan renk */
+
+        .table-responsive { max-height: 500px; }
+        .sticky-header th { position: sticky; top: 0; background: white; z-index: 10; }
+        .btn-sm { padding: .2rem .4rem; font-size: .75rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'yonetim:panel' %}">{{ site.ad }}</a>
+            <div class="ms-auto">
+                 <a href="{% url 'yonetim:panel' %}" class="btn btn-outline-light btn-sm">Panele Dön</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container container-detay">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show mt-2 mb-2" role="alert" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                {{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.75rem 1rem;"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'yonetim:panel' %}">Panel</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ daire_nesnesi.daire_tam_adi }} Ödeme Detayları</li>
+                    </ol>
+                </nav>
+
+                <div class="card">
+                    <div class="card-header">
+                        Daire Bilgileri ve Ödeme Özeti
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title">{{ daire_nesnesi.daire_tam_adi }}</h4>
+                        {% if daire_nesnesi.kullanici %}
+                        <p class="card-text"><strong>Sakin:</strong> {{ daire_nesnesi.kullanici.get_full_name }}</p>
+                        {% else %}
+                        <p class="card-text text-muted">Bu daireye atanmış bir sakin bulunmamaktadır.</p>
+                        {% endif %}
+                        {% if daire_nesnesi.telefon_no %}
+                        <p class="card-text"><strong>Telefon:</strong> {{ daire_nesnesi.telefon_no }}</p>
+                        {% endif %}
+                        <hr>
+
+                        <h5>{{ current_year }} Yılı Özeti</h5>
+                        <div class="summary-item">
+                            Yıllık Borç: <strong class="text-negative">{{ yillik_aidat_borcu_daire|floatformat:2|intcomma }} ₺</strong>
+                        </div>
+                        <div class="summary-item">
+                            Bu Yıl Ödenen: <strong class="text-positive">{{ odenen_bu_yil_daire|floatformat:2|intcomma }} ₺</strong>
+                        </div>
+                        <div class="summary-item">
+                            Bu Yıl Bakiye:
+                            <strong class="{% if bakiye_bu_yil_daire >= 0 %}text-positive{% else %}text-negative{% endif %}">
+                                {{ bakiye_bu_yil_daire|floatformat:2|intcomma }} ₺
+                            </strong>
+                        </div>
+                        <hr>
+                        <div class="summary-item">
+                            Toplam Ödenen Aidat (Tüm Zamanlar): <strong>{{ toplam_odenen_tum_zamanlar_daire|floatformat:2|intcomma }} ₺</strong>
+                        </div>
+                         {% if site.aidat_miktari %}
+                            <div class="text-muted small mt-2">
+                                Sitenin aylık standart aidat tutarı: {{ site.aidat_miktari|floatformat:2|intcomma }} ₺.
+                            </div>
+                        {% else %}
+                             <div class="text-muted small mt-2">
+                                Site için aylık standart bir aidat tutarı belirlenmemiş. Yıllık borç ve bakiye bilgileri bu nedenle 0 TL olarak görünebilir.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Aidat Ödeme Geçmişi
+                    </div>
+                    <div class="card-body">
+                        {% if aidatlar %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-sm">
+                                <thead class="sticky-header">
+                                    <tr>
+                                        <th>Ödeme Tarihi</th>
+                                        <th>Tutar</th>
+                                        <th>Açıklama</th>
+                                        <th>Makbuz</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for aidat in aidatlar %}
+                                    <tr>
+                                        <td>{{ aidat.tarih|date:"d F Y" }}</td>
+                                        <td class="text-end">{{ aidat.tutar|floatformat:2|intcomma }} ₺</td>
+                                        <td>{{ aidat.aciklama|default:"-" }}</td>
+                                        <td>
+                                            {% if aidat.makbuz %}
+                                            <a href="{{ aidat.makbuz.url }}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-1" style="font-size:0.75rem;">
+                                                Gör
+                                            </a>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if request.user.is_yonetici or request.user == daire_nesnesi.kullanici %}
+                                            <a href="{% url 'yonetim:aidat_update' aidat.id %}" class="btn btn-sm btn-outline-warning py-0 px-1" style="font-size:0.75rem;"><i class="fas fa-edit"></i></a>
+                                            <a href="{% url 'yonetim:aidat_delete' aidat.id %}" class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.75rem;"><i class="fas fa-trash-alt"></i></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-center text-muted">Bu daire için kayıtlı aidat ödemesi bulunmamaktadır.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-4 mt-auto text-center text-muted" style="background-color: #f8f9fa;">
+        <small>&copy; {% now "Y" %} {{ site.ad }}. Tüm hakları saklıdır.</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
