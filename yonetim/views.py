@@ -19,7 +19,7 @@ from .forms import AidatForm, GiderForm
 
 logger = logging.getLogger(__name__)
 
-# --- HELPER FONKSİYONLAR ---
+# --- HELPER FONKSİYONLAR --- (Yüklediğiniz dosyadaki gibi)
 
 
 def daire_natural_sort_key(daire_obj):
@@ -80,79 +80,78 @@ def panel(request):
         request.user, request.user.site_kodu)
     can_manage_site_finances = request.user.is_yonetici
 
-    # Formları her zaman oluştur, prefix'leri burada da belirtiyoruz.
+    # Form instance'larını her zaman en başta, prefix'leri ile tanımla
     aidat_form_initial = {'tarih': timezone.now().date()}
     if site_obj.aidat_miktari:
         aidat_form_initial['tutar'] = site_obj.aidat_miktari
 
-    aidat_form_instance = AidatForm(initial=aidat_form_initial, prefix="aidat")
-    gider_form_instance = GiderForm(
+    # Bu instance'lar, POST hatalıysa hatalı formla, değilse initial formla doldurulacak
+    aidat_form_panel = AidatForm(initial=aidat_form_initial, prefix="aidat")
+    gider_form_panel = GiderForm(
         initial={'tarih': timezone.now().date()}, prefix="gider")
 
     if request.method == 'POST':
-        # kayit_turu_select sadece yönetici için HTML'de olacağından, yönetici değilse None döner.
-        # Yönetici değilse veya alan gönderilmemişse varsayılan 'aidat' olur.
+        # Yönetici değilse None gelir
         kayit_turu = request.POST.get('kayit_turu_select')
 
-        # Eğer kullanıcı yönetici değilse, kayit_turu ne olursa olsun 'aidat' olarak kabul et
+        # Yönetici olmayan kullanıcılar sadece aidat girebilir, kayit_turu ne gelirse gelsin 'aidat'a çevir.
         if not can_manage_site_finances:
             kayit_turu = 'aidat'
-        # Yönetici ama bir şekilde kayit_turu_select gelmemişse (formda sorun olabilir)
-        elif not kayit_turu:
-            kayit_turu = 'aidat'  # Güvenlik için varsayılan
+        # Yönetici ise ama 'kayit_turu_select' bir şekilde POST'ta yoksa, güvenli varsayılan aidat.
+        # None veya beklenmedik bir değerse
+        elif kayit_turu not in ['aidat', 'gider']:
+            kayit_turu = 'aidat'
 
         if kayit_turu == 'aidat':
-            if not kullanici_kendi_dairesi:
+            if not kullanici_kendi_dairesi:  # Bu kontrol zaten var ama yine de kalsın
                 messages.error(
                     request, "Aidat eklenecek bir daireniz bulunmamaktadır.")
-                return redirect('yonetim:panel')
-
-            form_aidat_posted = AidatForm(
-                request.POST, request.FILES, prefix="aidat")
-            if form_aidat_posted.is_valid():
-                aidat = form_aidat_posted.save(commit=False)
-                aidat.daire = kullanici_kendi_dairesi
-                if not aidat.tutar and site_obj.aidat_miktari:
-                    aidat.tutar = site_obj.aidat_miktari
-                aidat.save()
-                messages.success(
-                    request, f"{kullanici_kendi_dairesi.daire_tam_adi} için aidat başarıyla eklendi.")
-                # Başarılı işlem sonrası formu temizlemek için redirect
-                return redirect('yonetim:panel')
+                # Redirect etmek yerine context ile sayfayı render etmek daha iyi olabilir
+                # ki diğer bilgiler (stat kartları vs.) kaybolmasın.
+                # Ama form hatalı değil, mantıksal bir eksiklik var.
             else:
-                # Aidat formu hatalarını sakla ve GET request'e geçer gibi context'i yeniden kur
-                aidat_form_instance = form_aidat_posted  # Hatalı formu tekrar göster
-                for field_name, errors in form_aidat_posted.errors.items():
-                    # field_name 'aidat-tutar' gibi prefixli gelecektir
-                    # form['prefix-alan_adi'] şeklinde erişim
-                    field_obj = form_aidat_posted[field_name]
-                    field_label = field_obj.label if hasattr(
-                        field_obj, 'label') else field_name
-                    messages.error(
-                        request, f"Aidat Formu Hatası ({field_label}): {'; '.join(errors)}")
+                # POST verisiyle ve doğru prefix ile formu tekrar oluştur
+                posted_aidat_form = AidatForm(
+                    request.POST, request.FILES, prefix="aidat")
+                if posted_aidat_form.is_valid():
+                    aidat = posted_aidat_form.save(commit=False)
+                    aidat.daire = kullanici_kendi_dairesi
+                    if not aidat.tutar and site_obj.aidat_miktari:
+                        aidat.tutar = site_obj.aidat_miktari
+                    aidat.save()
+                    messages.success(
+                        request, f"{kullanici_kendi_dairesi.daire_tam_adi} için aidat başarıyla eklendi.")
+                    # Başarılı kayıttan sonra formu temizle
+                    return redirect('yonetim:panel')
+                else:
+                    aidat_form_panel = posted_aidat_form  # Hatalı formu context'e ata
+                    for field_name, errors in posted_aidat_form.errors.items():
+                        # field_name, prefix içermeyen ham alan adıdır (örn: 'tutar')
+                        # FormField objesine erişmek için: posted_aidat_form[field_name]
+                        field_label = posted_aidat_form[field_name].label if field_name in posted_aidat_form.fields else field_name
+                        messages.error(
+                            request, f"Aidat Formu Hatası ({field_label}): {'; '.join(errors)}")
 
-        elif kayit_turu == 'gider':  # can_manage_site_finances zaten yukarıda kontrol edildi
-            form_gider_posted = GiderForm(
+        elif kayit_turu == 'gider':  # can_manage_site_finances zaten yukarıda teyit edildi
+            # POST verisiyle ve doğru prefix ile formu tekrar oluştur
+            posted_gider_form = GiderForm(
                 request.POST, request.FILES, prefix="gider")
-            if form_gider_posted.is_valid():
-                gider = form_gider_posted.save(commit=False)
+            if posted_gider_form.is_valid():
+                gider = posted_gider_form.save(commit=False)
                 gider.site = site_obj
                 gider.save()
                 messages.success(request, "Gider başarıyla eklendi.")
-                # Başarılı işlem sonrası formu temizlemek için redirect
+                # Başarılı kayıttan sonra formu temizle
                 return redirect('yonetim:panel')
             else:
-                # Gider formu hatalarını sakla
-                gider_form_instance = form_gider_posted  # Hatalı formu tekrar göster
-                for field_name, errors in form_gider_posted.errors.items():
-                    field_obj = form_gider_posted[field_name]
-                    field_label = field_obj.label if hasattr(
-                        field_obj, 'label') else field_name
+                gider_form_panel = posted_gider_form  # Hatalı formu context'e ata
+                for field_name, errors in posted_gider_form.errors.items():
+                    field_label = posted_gider_form[field_name].label if field_name in posted_gider_form.fields else field_name
                     messages.error(
                         request, f"Gider Formu Hatası ({field_label}): {'; '.join(errors)}")
 
-        # Eğer POST sonrası redirect yapılmadıysa (yani form valid değilse),
-        # hatalı form instance'ları zaten ayarlandı, sayfa aşağıda yeniden render edilecek.
+        # Eğer POST sonrası redirect yapılmadıysa (form valid değilse), sayfa aşağıdaki context ile render edilecek.
+        # aidat_form_panel ve gider_form_panel zaten güncellendi.
 
     # GET request veya hatalı POST sonrası context hazırlığı
     toplam_gelir_aidatlar = Aidat.objects.filter(daire__blok__site=site_obj).aggregate(
@@ -162,7 +161,6 @@ def panel(request):
     kasa_bakiyesi = toplam_gelir_aidatlar - toplam_giderler
 
     daire_aidat_ozetleri_listesi = []
-    # ... (aidat özet listesi oluşturma kodunuz aynı kalabilir) ...
     tum_daireler_qs = Daire.objects.filter(
         blok__site=site_obj).select_related('blok', 'kullanici')
     daireler_listesi_sirali = sorted(
@@ -192,19 +190,16 @@ def panel(request):
         if kendi_daire_ozeti:
             daire_aidat_ozetleri_listesi.remove(kendi_daire_ozeti)
             daire_aidat_ozetleri_listesi.insert(0, kendi_daire_ozeti)
-    # 4. Madde (12 satır) için backend'de veri hazırlığı:
-    # Örnek: Eğer aidat_listesi_ozet her zaman en az 12 elemanlı olsun isteniyorsa,
-    # ve gerçek veri sayısı 12'den az ise, kalanını boş objelerle doldurabilirsiniz.
-    # Bu, template'i basitleştirir.
-    # min_rows = 12
-    # if len(daire_aidat_ozetleri_listesi) < min_rows:
-    #     for _ in range(min_rows - len(daire_aidat_ozetleri_listesi)):
-    #         daire_aidat_ozetleri_listesi.append({
-    #             'blok_daire': "-", 'sakin': "-", 'yillik_borc': Decimal('0.00'),
-    #             'odenen': Decimal('0.00'), 'bakiye': Decimal('0.00'), 'is_current_user_flat': False,
-    #             'daire': None, # Veya boş bir placeholder Daire objesi, detay linki için None kontrolü yapılmalı
-    #             'is_placeholder': True # Template'de farklı stil için kullanılabilir
-    #         })
+
+    # 12 satır için placeholder ekleme (Opsiyonel, template'te de yönetilebilir)
+    min_rows_aidat_ozet = 12
+    if len(daire_aidat_ozetleri_listesi) < min_rows_aidat_ozet:
+        for _ in range(min_rows_aidat_ozet - len(daire_aidat_ozetleri_listesi)):
+            daire_aidat_ozetleri_listesi.append({
+                'blok_daire': "-", 'sakin': "-", 'yillik_borc': Decimal('0.00'),
+                'odenen': Decimal('0.00'), 'bakiye': Decimal('0.00'), 'is_current_user_flat': False,
+                'daire': None, 'is_placeholder': True
+            })
 
     site_gider_listesi_data = Gider.objects.filter(
         site=site_obj).order_by('-tarih', '-id')[:50]
@@ -218,20 +213,20 @@ def panel(request):
         'site_gider_listesi': site_gider_listesi_data,
         'daire_aidat_detay_listesi': daire_aidat_detay_listesi_data,
         # Hatalıysa hatalı form, değilse initial form
-        'aidat_form_panel': aidat_form_instance,
+        'aidat_form_panel': aidat_form_panel,
         # Hatalıysa hatalı form, değilse initial form
-        'gider_form_panel': gider_form_instance,
+        'gider_form_panel': gider_form_panel,
         'can_manage_site_finances': can_manage_site_finances,
         'kullanici_mevcut_bakiye_panel': kullanici_mevcut_bakiye_panel,
     }
     return render(request, 'yonetim/panel.html', context)
 
-# --- GİRİŞ, KAYIT, ÇIKIŞ ve DİĞER VIEW'LERİNİZ OLDUĞU GİBİ KALABİLİR ---
-# ... (giris, kayit, cikis, ajax_bloklar, ajax_daireler, site_bilgi, gider_update, gider_delete, aidat_update, aidat_delete, daire_odeme_detay fonksiyonları)
-# Bu fonksiyonlar önceki halleriyle büyük ölçüde aynı kalabilir, paneldeki form gönderimiyle doğrudan ilgili değiller.
-# Sadece `views.py` dosyasının tamamını vermeniz istendiği için buraya eklenecekler.
-# Aşağıya diğer fonksiyonlarınızı ekleyebilirsiniz.
-# Örnek olarak giris fonksiyonunu ekliyorum, diğerlerini de benzer şekilde ekleyebilirsiniz:
+# --- DİĞER VIEW FONKSİYONLARI (Yüklediğiniz dosyadaki gibi) ---
+# giris, kayit, cikis, ajax_bloklar, ajax_daireler,
+# site_bilgi, gider_update, gider_delete,
+# aidat_update, aidat_delete, daire_odeme_detay
+# fonksiyonları buraya eklenecek.
+# Örnek:
 
 
 def giris(request):
@@ -561,11 +556,10 @@ def site_bilgi(request):
                         aidat_miktari_str.replace(',', '.'))
                 except InvalidOperation:
                     messages.error(request, "Geçersiz aidat miktarı formatı.")
-                    aidat_miktari_form = None  # Hata durumunda None yap
+                    aidat_miktari_form = None
 
             try:
                 with transaction.atomic():
-                    # Yeni site oluşturuluyor (sadece yönetici ilk kayıtta buraya gelir)
                     if site_obj is None:
                         site_obj = Site.objects.create(
                             ad=site_adi, adres=site_adresi, kod=request.user.site_kodu,
@@ -573,7 +567,7 @@ def site_bilgi(request):
                         )
                         messages.success(
                             request, f"'{site_obj.ad}' sitesi başarıyla oluşturuldu.")
-                    else:  # Mevcut site güncelleniyor
+                    else:
                         site_obj.ad = site_adi
                         site_obj.adres = site_adresi
                         site_obj.yonetici_tel = yonetici_tel
@@ -582,7 +576,6 @@ def site_bilgi(request):
                         messages.success(
                             request, "Site bilgileri güncellendi.")
 
-                    # Yönetici Daire Ataması
                     if request.user.is_yonetici:
                         mevcut_yonetici_dairesi = Daire.objects.filter(
                             blok__site=site_obj, kullanici=request.user).first()
@@ -611,7 +604,6 @@ def site_bilgi(request):
                                 messages.error(
                                     request, "Geçersiz yönetici daire seçimi.")
 
-                    # Blok ve Daire İşlemleri
                     gelen_blok_idler_set = set()
                     for i in range(len(blok_adlari)):
                         blok_adi = blok_adlari[i].strip().upper()
@@ -633,21 +625,19 @@ def site_bilgi(request):
                                 request, f"'{blok_adi}' için daire sayısı pozitif olmalı. Atlandı.")
                             continue
 
-                        if blok_id_str_item:  # Mevcut blok güncelleniyor
+                        if blok_id_str_item:
                             try:
                                 blok_nesnesi = Blok.objects.get(
                                     id=int(blok_id_str_item), site=site_obj)
                                 blok_nesnesi.ad = blok_adi
                                 blok_nesnesi.save()
                                 gelen_blok_idler_set.add(blok_nesnesi.id)
-                                # Daire sayısı değişikliği (azalma varsa kullanıcıları silme, artma varsa yeni daire ekleme)
                                 mevcut_daire_sayisi = blok_nesnesi.daireler.count()
                                 if daire_sayisi > mevcut_daire_sayisi:
                                     for j in range(mevcut_daire_sayisi + 1, daire_sayisi + 1):
                                         Daire.objects.create(
                                             blok=blok_nesnesi, daire_no=str(j))
                                 elif daire_sayisi < mevcut_daire_sayisi:
-                                    # Daire sayısı azaltılırken, sondaki boş dairelerden başlanarak silinir. Doluysa silinmez, uyarılır.
                                     silinecek_daire_sayisi = mevcut_daire_sayisi - daire_sayisi
                                     sondaki_daireler = sorted(
                                         list(blok_nesnesi.daireler.all()), key=daire_natural_sort_key, reverse=True)
@@ -661,13 +651,12 @@ def site_bilgi(request):
                                         else:
                                             messages.warning(
                                                 request, f"{daire_to_check_delete.daire_tam_adi} dolu olduğu için silinemedi. Daire sayısı azaltma işlemi tam yapılamadı.")
-                                            # Dolu daireye denk gelince dur.
                                             break
                             except Blok.DoesNotExist:
                                 messages.error(
                                     request, "Güncellenmeye çalışılan blok bulunamadı.")
                                 continue
-                        else:  # Yeni blok ekleniyor
+                        else:
                             yeni_blok = Blok.objects.create(
                                 site=site_obj, ad=blok_adi)
                             gelen_blok_idler_set.add(yeni_blok.id)
@@ -675,7 +664,6 @@ def site_bilgi(request):
                                 Daire.objects.create(
                                     blok=yeni_blok, daire_no=str(j))
 
-                    # Formdan gelmeyen, veritabanında olan blokları sil
                     db_blok_idler_set = set(Blok.objects.filter(
                         site=site_obj).values_list('id', flat=True))
                     silinecek_blok_idler = db_blok_idler_set - gelen_blok_idler_set
@@ -691,23 +679,17 @@ def site_bilgi(request):
                                 messages.info(
                                     request, f"'{blok_to_delete.ad}' bloğu ve içindeki boş daireler silindi.")
                         except Blok.DoesNotExist:
-                            pass  # Zaten yoksa sorun değil
+                            pass
 
-                # Başarılı POST sonrası panele dön
                 return redirect('yonetim:panel')
             except IntegrityError as e:
                 messages.error(request, f"Veritabanı hatası: {e}")
             except Exception as e:
                 messages.error(request, f"Genel bir hata oluştu: {e}")
-            # Hata durumunda form_data_initial güncel kalmalı (sayfa yeniden render edilecek)
-            form_data_initial = request.POST.copy()  # Hatalı formu doldurmak için
-            # Blok ve daireleri de form_data'ya eklemek gerekebilir ama bu karmaşıklaşır.
-            # Şimdilik sadece ana site bilgileri korunuyor. Bloklar için DB'den okunacak.
+            form_data_initial = request.POST.copy()
 
-    # GET veya hatalı POST için context
     bloklar_ve_daireleri_c = []
     sitedeki_bos_ve_yoneticiye_ait_d = []
-    # site_obj None değilse (yani ya DB'den geldi ya da yeni oluşturuldu ama hata oldu)
     if site_obj:
         for blok_db in site_obj.bloklar.all().order_by('ad'):
             bloklar_ve_daireleri_c.append(
@@ -724,9 +706,8 @@ def site_bilgi(request):
     context = {
         'site': site_obj,
         'bloklar_ve_daireleri': bloklar_ve_daireleri_c,
-        # Bu durum POST sonrası pek olmaz, GET'te önemli
         'is_yeni_site': site_obj is None and request.user.is_yonetici,
-        'form_data': form_data_initial,  # GET'te DB'den, POST'ta hataysa request.POST'tan
+        'form_data': form_data_initial,
         'is_read_only': is_read_only_mode,
         'sitedeki_bos_ve_yoneticiye_ait_daireler': sitedeki_bos_ve_yoneticiye_ait_d,
         'yoneticinin_mevcut_dairesi_id': yoneticinin_mevcut_dairesi.id if yoneticinin_mevcut_dairesi else None,
@@ -773,9 +754,7 @@ def gider_delete(request, gider_id):
         messages.success(request, "Gider silindi.")
         return redirect(reverse('yonetim:panel') + '#siteGiderListesiPane')
     # GET isteği için bir onay sayfası render edilebilir, örneğin gider_confirm_delete.html
-    # Şimdilik direkt panele yönlendiriyoruz ama bu iyi bir pratik değil.
-    # return render(request, 'yonetim/gider_confirm_delete.html', {'gider': gider_obj, 'site': site_obj})
-    return redirect(reverse('yonetim:panel') + '#siteGiderListesiPane')
+    return render(request, 'yonetim/gider_confirm_delete.html', {'gider': gider_obj, 'site': site_obj})
 
 
 @login_required
@@ -783,8 +762,6 @@ def aidat_update(request, aidat_id):
     aidat_obj = get_object_or_404(Aidat, id=aidat_id)
     daire_obj = aidat_obj.daire
     site_obj_of_aidat = daire_obj.blok.site
-    # Sadece site yöneticisi ve o siteye ait yönetici bu işlemi yapabilmeli.
-    # VEYA aidatın sahibi olan kullanıcı (kendi aidatını düzenleyebilsin isteniyorsa) - Şimdilik sadece yönetici
     if not (request.user.is_yonetici and request.user.site_kodu == site_obj_of_aidat.kod):
         messages.error(request, "Bu aidat kaydını düzenleme yetkiniz yok.")
         return redirect('yonetim:panel')
@@ -829,22 +806,13 @@ def aidat_delete(request, aidat_id):
         messages.success(request, "Aidat kaydı silindi.")
         return redirect(redirect_url)
 
-    # GET isteği için bir onay sayfası (aidat_confirm_delete.html) olmalı
     context = {
         'aidat': aidat_obj,
         'daire': daire_obj,
         'site': site_obj_of_aidat,
         'cancel_url': redirect_url
     }
-    # return render(request, 'yonetim/aidat_confirm_delete.html', context)
-    # Şimdilik onay sayfası olmadan direkt siliyoruz (POST ile gelinmeli)
-    # Eğer GET ile gelinirse bir şey yapma veya onay sayfasına yönlendir. Güvenlik için GET ile silme yapılmamalı.
-    # Bu fonksiyon sadece POST ile çalışmalı ya da GET için onay göstermeli.
-    # Mevcut haliyle direkt redirect yapıyor, bu POST ile gelinmediyse mantıksız.
-    # Onay sayfası olmadığı için, sadece POST ise sil, değilse ana sayfaya dön diyelim.
-    messages.warning(
-        request, "Silme işlemi için POST isteği gereklidir veya onay sayfası kullanılmalıdır.")
-    return redirect(redirect_url)
+    return render(request, 'yonetim/aidat_confirm_delete.html', context)
 
 
 @login_required
@@ -858,7 +826,6 @@ def daire_odeme_detay(request, daire_id):
         return redirect('yonetim:panel')
 
     site_obj = daire_obj.blok.site
-    # Yetki kontrolü: Kullanıcı ya o dairenin sakini olmalı ya da sitenin yöneticisi
     is_site_yonetici = request.user.is_yonetici and request.user.site_kodu == site_obj.kod
     is_daire_sakini = daire_obj.kullanici == request.user
 
@@ -871,7 +838,7 @@ def daire_odeme_detay(request, daire_id):
     toplam_odenen_tum = aidatlar.aggregate(toplam=Sum('tutar'))[
         'toplam'] or Decimal('0.00')
 
-    current_year_val = timezone.now().year  # Değişken adı düzeltildi
+    current_year_val = timezone.now().year
     yillik_borc = (site_obj.aidat_miktari *
                    12) if site_obj.aidat_miktari else Decimal('0.00')
     odenen_bu_yil = Aidat.objects.filter(daire=daire_obj, tarih__year=current_year_val).aggregate(
@@ -885,9 +852,8 @@ def daire_odeme_detay(request, daire_id):
         'yillik_aidat_borcu_daire': yillik_borc,
         'odenen_bu_yil_daire': odenen_bu_yil,
         'bakiye_bu_yil_daire': bakiye_bu_yil,
-        'current_year': current_year_val,  # Değişken adı context'e doğru aktarıldı
+        'current_year': current_year_val,
         'site': site_obj,
-        # Sadece yönetici detay sayfasında düzenleme yapabilsin
         'can_edit_aidat_records_on_detail': is_site_yonetici,
     }
     return render(request, 'yonetim/daire_odeme_detay.html', context)
