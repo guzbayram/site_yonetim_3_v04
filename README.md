@@ -16,3 +16,4 @@ Bu proje, site yönetimi için geliştirilmiş bir web uygulamasıdır. Django f
 2. Gerekli paketleri yükleyin: `pip install -r requirements.txt`
 3. Veritabanını oluşturun: `python manage.py migrate`
 4. Sunucuyu başlatın: `python manage.py runserver`
+# site_yonetim_3_v04
