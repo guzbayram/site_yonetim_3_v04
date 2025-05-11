@@ -6,329 +6,267 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Yönetim Paneli - {{ site.ad }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <style>
         :root {
-            --theme-primary: #6c63ff; /* Ana mavi/mor tema rengi (33.jpg ve sds.jpg'den ilhamla) */
-            --theme-secondary: #574fd6; /* Ana rengin koyu tonu */
-            --theme-light-bg: #dee2e6;  /* Açık gri/mavi arka plan */
-        /* --theme-light-bg: #f0f2f5;  Açık gri/mavi arka plan */
+            --theme-primary: #574fd6; /* Giriş sayfasındaki ana mavi/mor */
+            --theme-secondary: #574fd6;
+            --theme-danger: #dc3545;
+            --theme-light-bg: #6c63ff;
+          /*--theme-light-bg: #f0f2f5;*/
             --theme-card-bg: #ffffff;
-            --theme-text-dark: #333;
-            --theme-text-light: #fff;
+            --theme-text-dark: #343a40;
+            --theme-text-light: #ffffff;
             --theme-text-muted: #6c757d;
-            --theme-border-color: #dee2e6;
-            --text-green: #28a745;
+            --theme-border-color: #dc3545;
+         /* --theme-border-color: #dee2e6; */
+            --text-green: #198754;
             --text-red: #dc3545;
+            --text-warning: #ffc107;
         }
-
-        body {
-            background-color: var(--theme-light-bg);
-            font-family: "Segoe UI", sans-serif;
-            color: var(--theme-text-dark);
+        body { background-color: var(--theme-light-bg); font-family: "Segoe UI", sans-serif; color: var(--theme-text-dark); line-height: 1.6; }
+        
+        /* 1. Mavi alanın yüksekliği iki katına çıkarıldı (padding artırıldı) */
+        .main-panel-header {
+            background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
+            color: var(--theme-text-light); 
+            padding: 80px 20px; /* Orijinal: 40px 20px */
+            /*border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;*/
         }
+        .main-panel-header .welcome-message h1 { font-size: 1.8rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .main-panel-header .welcome-message p { font-size: 1rem; margin-bottom: 0; opacity: 0.9; }
+        .main-panel-header .btn-outline-light { font-weight: 500; } .main-panel-header .btn-light { font-weight: 500; }
 
-        .main-panel-container {
-            background-color: var(--theme-primary);
-            color: var(--theme-text-light);
-            padding: 40px 20px;
-            min-height: 30vh; /* Sol taraftaki başlık alanı için yükseklik */
-        }
-
-        .panel-content-wrapper {
-            padding: 20px;
-            margin-top: -100px; /* Kartların başlık alanının üzerine taşması için */
-        }
-
-        .stat-card {
-            background-color: var(--theme-card-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
+        /* 3. Mavi alanın sol tarafındaki yazılar için (panel içeriğinin solu) stil */
+        .title-section-panel {
+            color: var(--theme-text-dark); 
+            padding: 20px; 
+            background-color: var(--theme-card-bg); 
+            border-radius: 10px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06); 
             margin-bottom: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            text-align: center;
-            color: var(--theme-text-dark);
+            height: 100%; /* İçeriğe göre ayarlanabilir veya sabit bir yükseklik verilebilir */
         }
-        .stat-card h5 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--theme-primary);
-        }
-        .stat-card p {
-            font-size: 0.9rem;
-            color: var(--theme-text-muted);
-            margin-bottom: 0;
-        }
-        .stat-card.kasa-pozitif h5 { color: var(--text-green); }
-        .stat-card.kasa-negatif h5 { color: var(--text-red); }
-
-
-        .left-column-card {
-            background-color: var(--theme-card-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .left-column-card .user-info p { margin-bottom: 0.3rem; font-size: 0.9rem; }
-        .left-column-card .user-info strong { color: var(--theme-primary); }
-
-        .action-form-card { /* Aidat/Gider giriş kartları */
-            background-color: var(--theme-card-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .action-form-card h5 {
+        .title-section-panel h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
             color: var(--theme-primary);
             margin-bottom: 1rem;
-            font-weight: 600;
         }
-        .btn-panel-theme {
-            background-color: var(--theme-primary);
-            border-color: var(--theme-primary);
-            color: var(--theme-text-light);
-        }
-        .btn-panel-theme:hover {
-            background-color: var(--theme-secondary);
-            border-color: var(--theme-secondary);
+        .title-section-panel p {
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
-        .nav-tabs-panel .nav-link {
-            color: var(--theme-text-muted);
-            font-weight: 500;
-            border-bottom: 2px solid transparent;
-            border-top-left-radius: 0.3rem;
-            border-top-right-radius: 0.3rem;
-        }
-        .nav-tabs-panel .nav-link.active {
-            color: var(--theme-primary);
-            border-color: var(--theme-primary);
-            background-color: var(--theme-card-bg);
-        }
-        .tab-content-panel {
-            background-color: var(--theme-card-bg);
-            padding: 1.5rem;
-            border-radius: 0 0 8px 8px; /* Üstteki tablarla birleşik görünüm */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .table-panel th {
-            background-color: var(--theme-light-bg); /* Tablo başlıkları için hafif arka plan */
-        }
+        .panel-content-wrapper { padding: 20px 15px; margin-top: -60px; /* Artan header padding'i dengelemek için ayarlandı, orijinal -40px idi */ }
+        .stat-card { background-color: var(--theme-card-bg); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 5px 15px rgba(0,0,0,0.06); text-align: center; }
+        .stat-card p { font-size: 1.2rem; text-transform: uppercase; color: var(--theme-text-muted); margin-bottom: 0.5rem; font-weight:500; }
+        .stat-card h5 { font-size: 1.8rem; font-weight: 700; color: var(--theme-primary); }
+        .stat-card.kasa-pozitif h5 { color: var(--text-green); } .stat-card.kasa-negatif h5 { color: var(--text-red); }
 
-        .fixed-bottom-messages { /* Django mesajları için */
-            position: fixed; bottom: 20px; left: 50%;
-            transform: translateX(-50%); z-index: 1050;
-            width: auto; max-width: 80%; display: flex;
-            flex-direction: column; gap: 0.5rem;
-        }
+        .combined-entry-card { background-color: var(--theme-card-bg); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 5px 15px rgba(0,0,0,0.06); }
+        .combined-entry-card h5 { color: var(--theme-primary); margin-bottom: 1rem; font-weight: 600; font-size: 1.2rem;}
+        .combined-entry-card .form-label-sm { font-size: 0.8rem; margin-bottom: 0.2rem; color: var(--theme-text-muted); }
+        .combined-entry-card .form-control, .combined-entry-card .form-select { font-size: 0.9rem; }
+        .btn-panel-theme { background-color: var(--theme-primary); border-color: var(--theme-primary); color: var(--theme-text-light); font-weight: 500; padding: 0.5rem 1rem; }
+        .btn-panel-theme:hover { background-color: var(--theme-secondary); border-color: var(--theme-secondary); }
 
-        /* Küçük ekranlar için bazı düzenlemeler */
-        @media (max-width: 991.98px) {
-            .main-panel-container { text-align: center; }
-            .panel-content-wrapper { margin-top: -60px; }
-            .right-form-column { margin-top: 1.5rem; }
-        }
+        .nav-tabs-panel {  background-color: var(--theme-card-bg); border-bottom: 1px solid var(--theme-border-color); }
+        .nav-tabs-panel .nav-link { color: var(--theme-text-muted); font-weight: 500; border: 0; border-bottom: 13px solid transparent; padding: 0.7rem 1rem; font-size:0.9rem;}
+        .nav-tabs-panel .nav-link.active { color: var(--theme-danger); border-bottom-color: var(--theme-danger); background-color: transparent; }
+        .tab-content-panel { background-color: var(--theme-card-bg); padding: 1.5rem; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.06); margin-top: 1rem; }
+        .table-panel { font-size: 0.85rem; } .table-panel th { background-color: #f8f9fa; font-weight: 600; }
+        .table-panel td, .table-panel th { vertical-align: middle; } .table-panel .btn-sm { padding: .15rem .4rem; font-size: .7rem; }
 
+        .fixed-bottom-messages { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1050; width: auto; max-width: 500px; }
+        .fixed-bottom-messages .alert { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        @media (max-width: 991.98px) { 
+            .main-panel-header { text-align: center; } 
+            .panel-content-wrapper { margin-top: -50px; /* Media query için ayarlandı */ } 
+            .main-panel-header .welcome-message, .main-panel-header .header-buttons { text-align: center !important;} /* Butonların ve mesajın merkezlenmesi */
+        }
     </style>
 </head>
 <body>
-    <div class="main-panel-container">
+    <div class="main-panel-header">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-7 col-md-12">
-                    <h1 class="display-5 fw-bold">Site Mali Yönetim Paneli</h1>
-                    <p class="lead">Aidat ve giderlerinizi kolayca yönetin, site mali durumunu anlık olarak takip edin. Tüm finansal işlemleriniz parmaklarınızın ucunda.</p>
-                </div>
-                <div class="col-lg-5 col-md-12 text-lg-end text-center mt-3 mt-lg-0">
-                    <a href="{% url 'yonetim:site_bilgi' %}" class="btn btn-outline-light btn-lg me-2">Site Bilgileri</a>
-                    <a href="{% url 'yonetim:cikis' %}" class="btn btn-light btn-lg"><i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap</a>
-                </div>
+            <div class="row">
+
+              <div class="col-8">
+                <div class="row">
+                  <div class="col-12">
+                    <h2>Yönetim Paneli</h2>
+                    <p>Apartman ve site yönetimi süreçlerinizi kolaylaştırmak için tasarlandı. Aidatlarınızı takip edebilir, giderleri yönetebilir ve site sakinleriyle etkileşimde bulunabilirsiniz.</p>
+                    <p>Giriş ve kayıt sayfalarındaki gibi bilgilendirici metinler burada yer alabilir.</p>
+                  </div>
+                </div>            
+              </div>
+              <div class="col-4">
+              <div class="row">
+                  <div class="col-12 welcome-message mb-3 text-lg-end text-center"> <h1>Merhaba, {{ request.user.first_name|default:request.user.username }}!</h1>
+                      {% if kullanici_kendi_dairesi and kullanici_mevcut_bakiye_panel is not None %}
+                          <p>
+                              Aidat bakiyeniz:
+                              <strong class="{% if kullanici_mevcut_bakiye_panel >= 0 %}text-white{% else %}text-warning{% endif %}" style="font-size: 1.2em;">
+                                  {{ kullanici_mevcut_bakiye_panel|floatformat:2|intcomma }} ₺
+                              </strong>
+                              {% if kullanici_mevcut_bakiye_panel < 0 %}(Borçlu){% elif kullanici_mevcut_bakiye_panel > 0 %}(Alacaklı){% else %}(Borcunuz Yok){% endif %}
+                          </p>
+                      {% elif request.user.is_yonetici %}
+                          <p>Yönetici Paneli | Site: <strong>{{ site.ad }}</strong></p>
+                      {% endif %}
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="col-12 header-buttons text-lg-end text-center"> <a href="{% url 'yonetim:site_bilgi' %}" class="btn btn-outline-light me-2"><i class="fas fa-building-user me-1"></i> Site Bilgileri</a>
+                      <a href="{% url 'yonetim:cikis' %}" class="btn btn-light"><i class="fas fa-sign-out-alt me-1"></i>Çıkış Yap</a>
+                  </div>
+              </div>
+                
+              </div>
             </div>
         </div>
     </div>
+
+
+
 
     <div class="container panel-content-wrapper">
         {% if messages %}
         <div class="fixed-bottom-messages">
             {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
-                {{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }} <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             {% endfor %}
         </div>
         {% endif %}
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <p>Toplam Tahsil Edilen Aidat</p>
-                    <h5>{{ toplam_gelir_aidatlar|floatformat:2|intcomma }} ₺</h5>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <p>Toplam Site Gideri</p>
-                    <h5>{{ toplam_giderler|floatformat:2|intcomma }} ₺</h5>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card {% if kasa_bakiyesi >= 0 %}kasa-pozitif{% else %}kasa-negatif{% endif %}">
-                    <p>Kasa Durumu</p>
-                    <h5>{{ kasa_bakiyesi|floatformat:2|intcomma }} ₺</h5>
-                </div>
-            </div>
-        </div>
-
         <div class="row">
-            <div class="col-lg-4">
-                <div class="left-column-card user-info mb-4">
-                    <h4 class="mb-3" style="color: var(--theme-primary);">Merhaba, {{ request.user.get_full_name|default:request.user.username }}!</h4>
-                    {% if kullanici_kendi_dairesi %}
-                        <p><strong>Daire:</strong> {{ kullanici_kendi_dairesi.daire_tam_adi }}</p>
-                    {% elif request.user.is_yonetici %}
-                        <p>(Yönetici Hesabı)</p>
-                    {% endif %}
-                    <p><strong>Site:</strong> {{ site.ad }}</p>
-                    {% if site.aidat_miktari %}
-                    <p><strong>Aylık Aidat:</strong> {{ site.aidat_miktari|floatformat:2 }} ₺</p>
-                    {% endif %}
+          
+
+            <div class="col-lg-12"> <div class="row">
+                    <div class="col-md-4">
+                        <div class="stat-card"> <p>Toplam Gelir (Aidat)</p> <h5>{{ toplam_gelir_aidatlar|floatformat:2|intcomma }} ₺</h5> </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card"> <p>Toplam Gider</p> <h5>{{ toplam_giderler|floatformat:2|intcomma }} ₺</h5> </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card {% if kasa_bakiyesi >= 0 %}kasa-pozitif{% else %}kasa-negatif{% endif %}"> <p>Kasa Durumu</p> <h5>{{ kasa_bakiyesi|floatformat:2|intcomma }} ₺</h5> </div>
+                    </div>
                 </div>
 
-                {% if aidat_ekle_form %} {# Sadece kendi dairesi olanlar aidat ekleyebilir #}
-                <div class="action-form-card" id="anaAidatIslemKarti">
-                    <h5>Aidat İşle ({{ kullanici_kendi_dairesi.daire_tam_adi }})</h5>
-                    <form method="post" enctype="multipart/form-data"> {% csrf_token %}
-                        <input type="hidden" name="aidat_ekle" value="1">
-                        {% for field in aidat_ekle_form %}
-                        <div class="mb-2">
-                            <label for="id_main_{{ field.html_name }}" class="form-label form-label-sm">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
-                            {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                <div class="row mt-3">
+                    <div class="col-lg-4">
+                        <div class="combined-entry-card">
+                            <form method="post" enctype="multipart/form-data" id="combinedEntryForm" novalidate>
+                                {% csrf_token %}
+                                <h5><i class="fas fa-plus-circle me-2"></i>Kayıt Girişi</h5>
+
+                                {% if request.user.is_yonetici %}
+                                <div class="mb-3">
+                                    <label for="kayitTuruSelect" class="form-label form-label-sm">Kayıt Türü</label>
+                                    <select class="form-select form-select-sm" id="kayitTuruSelect" name="kayit_turu_select">
+                                        <option value="aidat" selected>Aidat Girişi</option>
+                                        <option value="gider">Gider Girişi</option>
+                                    </select>
+                                </div>
+                                {% else %}
+                                    {# Yönetici değilse, kayit_turu_select göndermeye gerek yok, view'da varsayılan aidat olacak #}
+                                {% endif %}
+
+                                <div id="aidatFieldsContainer">
+                                    {% if kullanici_kendi_dairesi %}
+                                        <p class="text-muted small mb-2">Aidat Dairesi: {{ kullanici_kendi_dairesi.daire_tam_adi }}</p>
+                                        {% for field in aidat_form_panel %}
+                                        <div class="mb-3">
+                                            <label for="{{ aidat_form_panel.prefix }}-{{ field.html_name }}" class="form-label form-label-sm">{{ field.label }}</label>
+                                            {{ field }}
+                                            {% if field.help_text %}<small class="form-text text-muted d-block mt-1">{{ field.help_text }}</small>{% endif %}
+                                            {% for error in field.errors %}<div class="invalid-feedback d-block small">{{ error }}</div>{% endfor %}
+                                        </div>
+                                        {% endfor %}
+                                    {% elif not request.user.is_yonetici %}
+                                        <p class="text-danger">Aidat girişi için atanmış bir daireniz bulunmamaktadır.</p>
+                                    {% endif %}
+                                </div>
+
+                                {% if request.user.is_yonetici %}
+                                <div id="giderFieldsContainer" style="display: none;">
+                                    {% for field in gider_form_panel %}
+                                    <div class="mb-3">
+                                        <label for="{{ gider_form_panel.prefix }}-{{ field.html_name }}" class="form-label form-label-sm">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% if field.help_text %}<small class="form-text text-muted d-block mt-1">{{ field.help_text }}</small>{% endif %}
+                                        {% for error in field.errors %}<div class="invalid-feedback d-block small">{{ error }}</div>{% endfor %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if kullanici_kendi_dairesi or request.user.is_yonetici %}
+                                <button type="submit" class="btn btn-panel-theme w-100 mt-2">Kaydet</button>
+                                {% endif %}
+                            </form>
                         </div>
-                        {% endfor %}
-                        <button type="submit" class="btn btn-panel-theme w-100 mt-2">Aidatı Kaydet</button>
-                    </form>
-                </div>
-                {% endif %}
-            </div>
+                    </div>
 
-            <div class="col-lg-8">
-                <div class="row">
-                    <div class="{% if can_manage_site_finances %}col-md-8{% else %}col-md-12{% endif %}"> {# Eğer Gider Formu varsa bu daralır #}
-                        <ul class="nav nav-tabs nav-tabs-panel mb-0" id="panelTabs" role="tablist">
+                    <div class="col-lg-8">
+                        <ul class="nav nav-tabs nav-tabs-panel" id="panelTabsList" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="aidat-listesi-ozet-tab" data-bs-toggle="tab" data-bs-target="#aidatListesiOzetPane" type="button" role="tab" aria-selected="true">Aidat Özet</button>
+                                <button class="nav-link active" id="tab-aidat-ozet" data-bs-toggle="tab" data-bs-target="#content-aidat-ozet" type="button" role="tab"><i class="fas fa-list-alt me-1"></i>Aidat Özet</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="site-gider-listesi-tab" data-bs-toggle="tab" data-bs-target="#siteGiderListesiPane" type="button" role="tab" aria-selected="false">Gider Listesi</button>
+                                <button class="nav-link" id="tab-giderler" data-bs-toggle="tab" data-bs-target="#content-giderler" type="button" role="tab"><i class="fas fa-file-invoice-dollar me-1"></i>Giderler</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="daire-aidat-detay-listesi-tab" data-bs-toggle="tab" data-bs-target="#daireAidatDetayListesiPane" type="button" role="tab" aria-selected="false">Aidat Detayları</button>
+                                <button class="nav-link" id="tab-aidat-detay" data-bs-toggle="tab" data-bs-target="#content-aidat-detay" type="button" role="tab"><i class="fas fa-credit-card me-1"></i>Aidat Detay</button>
                             </li>
                         </ul>
                         <div class="tab-content tab-content-panel" id="panelTabsContent">
-                            <div class="tab-pane fade show active" id="aidatListesiOzetPane" role="tabpanel" tabindex="0">
-                                 <h6>Aidat Takip Listesi ({{ current_year }})</h6>
+                            <div class="tab-pane fade show active" id="content-aidat-ozet" role="tabpanel">
+                                <h6 class="mb-3">Yıllık Aidat Takip Listesi ({{ current_year }})</h6>
                                 {% if aidat_listesi_ozet %}
-                                <div class="table-responsive" style="max-height: 400px;">
-                                    <table class="table table-striped table-hover table-sm table-panel">
-                                        <thead><tr><th>B-D</th><th>Sakin</th><th class="text-end">Y.Borç</th><th class="text-end">Ödenen</th><th class="text-end">Bakiye</th><th></th></tr></thead>
+                                <div class="table-responsive" style="max-height: 500px;"> <table class="table table-striped table-hover table-sm table-panel">
+                                        <thead><tr><th>B-D</th><th>Sakin</th><th class="text-end">Y.Borç</th><th class="text-end">Ödenen</th><th class="text-end">Bakiye</th><th>Detay</th></tr></thead>
                                         <tbody>
                                         {% for ozet in aidat_listesi_ozet %}
-                                        <tr {% if ozet.is_current_user_flat %}class="table-info fw-bold"{% endif %}>
-                                            <td>{{ ozet.blok_daire }}</td> <td>{{ ozet.sakin|truncatechars:15 }}</td>
-                                            <td class="text-end text-danger">{{ ozet.yillik_borc|floatformat:0|intcomma }}</td>
-                                            <td class="text-end text-success">{{ ozet.odenen|floatformat:0|intcomma }}</td>
-                                            <td class="text-end {% if ozet.bakiye >= 0 %}text-success{% else %}text-danger{% endif %}">{{ ozet.bakiye|floatformat:0|intcomma }}</td>
-                                            <td><a href="{% url 'yonetim:daire_odeme_detay' daire_id=ozet.daire.id %}" class="btn btn-sm btn-outline-primary py-0 px-1"><i class="fas fa-eye"></i></a></td>
-                                        </tr>
+                                            <tr {% if ozet.is_current_user_flat %}class="table-primary"{% endif %}>
+                                                <td><strong>{{ ozet.blok_daire }}</strong></td> 
+                                                <td>{{ ozet.sakin|default:"Boş"|truncatechars:20 }}</td>
+                                                <td class="text-end text-danger">{{ ozet.yillik_borc|floatformat:2|intcomma }}</td>
+                                                <td class="text-end text-success">{{ ozet.odenen|floatformat:2|intcomma }}</td>
+                                                <td class="text-end {% if ozet.bakiye >= 0 %}text-success{% else %}text-danger{% endif %}"><strong>{{ ozet.bakiye|floatformat:2|intcomma }}</strong></td>
+                                                <td class="text-center"><a href="{% url 'yonetim:daire_odeme_detay' daire_id=ozet.daire.id %}" class="btn btn-sm btn-outline-primary py-0 px-2"><i class="fas fa-eye"></i></a></td>
+                                            </tr>
                                         {% endfor %}
+                                       
                                         </tbody>
                                     </table>
                                 </div>
-                                {% else %}<p class="text-muted">Aidat özeti bulunamadı.</p>{% endif %}
+                                {% else %}
+                                <p class="text-muted text-center mt-3">Aidat özeti bulunamadı.</p>
+                                {% endif %}
                             </div>
-                            <div class="tab-pane fade" id="siteGiderListesiPane" role="tabpanel" tabindex="0">
-                                <h6>Site Giderleri (Son 50)</h6>
-                                {% if site_gider_listesi %}
-                                <div class="table-responsive" style="max-height: 400px;">
-                                    <table class="table table-sm table-striped table-hover table-panel">
-                                        <thead><tr><th>Tarih</th><th>Tür</th><th class="text-end">Tutar</th><th>Açıklama</th><th></th>{% if can_manage_site_finances %}<th></th>{% endif %}</tr></thead>
-                                        <tbody>
-                                        {% for gider in site_gider_listesi %}
-                                        <tr>
-                                            <td>{{ gider.tarih|date:"dMy" }}</td> <td>{{ gider.tur|truncatechars:15 }}</td> <td class="text-end text-danger">{{ gider.tutar|floatformat:0|intcomma }}</td>
-                                            <td>{{ gider.aciklama|truncatewords:3 }}</td>
-                                            <td>{% if gider.makbuz %}<a href="{{ gider.makbuz.url }}" target="_blank"><i class="fas fa-paperclip"></i></a>{% endif %}</td>
-                                            {% if can_manage_site_finances %}
-                                            <td>
-                                                <a href="{% url 'yonetim:gider_update' gider.id %}" class="btn btn-sm btn-outline-warning py-0 px-1"><i class="fas fa-edit"></i></a>
-                                                <a href="{% url 'yonetim:gider_delete' gider.id %}" class="btn btn-sm btn-outline-danger py-0 px-1"><i class="fas fa-trash"></i></a>
-                                            </td>
-                                            {% endif %}
-                                        </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}<p class="text-muted">Kayıtlı gider bulunmamaktadır.</p>{% endif %}
+                            <div class="tab-pane fade" id="content-giderler" role="tabpanel">
+                                <h6 class="mb-3">Site Gider Kayıtları (Son 50)</h6>
+                                {% if site_gider_listesi %}<div class="table-responsive" style="max-height: 500px;"><table class="table table-sm table-striped table-hover table-panel"><thead><tr><th>Tarih</th><th>Tür</th><th class="text-end">Tutar</th><th>Açıklama</th><th>Makbuz</th>{% if can_manage_site_finances %}<th>İşlem</th>{% endif %}</tr></thead><tbody>
+                                {% for gider in site_gider_listesi %}<tr><td>{{ gider.tarih|date:"d.m.Y" }}</td> <td>{{ gider.tur|truncatechars:20 }}</td> <td class="text-end text-danger">{{ gider.tutar|floatformat:2|intcomma }}</td><td>{{ gider.aciklama|default:"-"|truncatewords:4 }}</td><td class="text-center">{% if gider.makbuz %}<a href="{{ gider.makbuz.url }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0 px-2"><i class="fas fa-paperclip"></i></a>{% else %}-{% endif %}</td>
+                                {% if can_manage_site_finances %}<td class="text-center"><a href="{% url 'yonetim:gider_update' gider.id %}" class="btn btn-sm btn-outline-warning py-0 px-2 me-1"><i class="fas fa-edit"></i></a><a href="{% url 'yonetim:gider_delete' gider.id %}" class="btn btn-sm btn-outline-danger py-0 px-2"><i class="fas fa-trash"></i></a></td>{% endif %}</tr>{% endfor %}
+                                </tbody></table></div>{% else %}<p class="text-muted text-center mt-3">Kayıtlı gider bulunmamaktadır.</p>{% endif %}
                             </div>
-                            <div class="tab-pane fade" id="daireAidatDetayListesiPane" role="tabpanel" tabindex="0">
-                                <h6>Daire Aidat Detayları (Son 50)</h6>
-                                {% if daire_aidat_detay_listesi %}
-                                <div class="table-responsive" style="max-height: 400px;">
-                                    <table class="table table-sm table-striped table-hover table-panel">
-                                        <thead><tr><th>Tarih</th><th>Daire</th><th>Sakin</th><th class="text-end">Tutar</th><th>Açıklama</th><th></th>{% if can_edit_specific_aidat %}<th></th>{% endif %}</tr></thead>
-                                        <tbody>
-                                        {% for aidat_kaydi in daire_aidat_detay_listesi %}
-                                        <tr>
-                                            <td>{{ aidat_kaydi.tarih|date:"dMy" }}</td><td>{{ aidat_kaydi.daire.daire_tam_adi }}</td><td>{{ aidat_kaydi.daire.kullanici.get_full_name|truncatechars:15 }}</td>
-                                            <td class="text-end text-success">{{ aidat_kaydi.tutar|floatformat:0|intcomma }}</td><td>{{ aidat_kaydi.aciklama|truncatewords:3 }}</td>
-                                            <td>{% if aidat_kaydi.makbuz %}<a href="{{ aidat_kaydi.makbuz.url }}" target="_blank"><i class="fas fa-paperclip"></i></a>{% endif %}</td>
-                                            {% if can_edit_specific_aidat %}
-                                            <td>
-                                                <a href="{% url 'yonetim:aidat_update' aidat_kaydi.id %}?from_panel=true" class="btn btn-sm btn-outline-warning py-0 px-1"><i class="fas fa-edit"></i></a>
-                                                <a href="{% url 'yonetim:aidat_delete' aidat_kaydi.id %}?from_panel=true" class="btn btn-sm btn-outline-danger py-0 px-1"><i class="fas fa-trash"></i></a>
-                                            </td>
-                                            {% endif %}
-                                        </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}<p class="text-muted">Kayıtlı aidat detayı bulunmamaktadır.</p>{% endif %}
+                            <div class="tab-pane fade" id="content-aidat-detay" role="tabpanel">
+                                 <h6 class="mb-3">Tüm Aidat Kayıtları (Son 50)</h6>
+                                {% if daire_aidat_detay_listesi %}<div class="table-responsive" style="max-height: 500px;"><table class="table table-sm table-striped table-hover table-panel"><thead><tr><th>Tarih</th><th>Daire</th><th>Sakin</th><th class="text-end">Tutar</th><th>Açıklama</th><th>Makbuz</th>{% if can_edit_specific_aidat %}<th>İşlem</th>{% endif %}</tr></thead><tbody>
+                                {% for aidat_kaydi in daire_aidat_detay_listesi %}<tr><td>{{ aidat_kaydi.tarih|date:"d.m.Y" }}</td><td>{{ aidat_kaydi.daire.daire_tam_adi }}</td><td>{{ aidat_kaydi.daire.kullanici.get_full_name|default:"-"|truncatechars:20 }}</td><td class="text-end text-success">{{ aidat_kaydi.tutar|floatformat:2|intcomma }}</td><td>{{ aidat_kaydi.aciklama|default:"-"|truncatewords:4 }}</td><td class="text-center">{% if aidat_kaydi.makbuz %}<a href="{{ aidat_kaydi.makbuz.url }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0 px-2"><i class="fas fa-paperclip"></i></a>{% else %}-{% endif %}</td>
+                                {% if can_edit_specific_aidat %}<td class="text-center"><a href="{% url 'yonetim:aidat_update' aidat_kaydi.id %}?from_panel=true" class="btn btn-sm btn-outline-warning py-0 px-2 me-1"><i class="fas fa-edit"></i></a><a href="{% url 'yonetim:aidat_delete' aidat_kaydi.id %}?from_panel=true" class="btn btn-sm btn-outline-danger py-0 px-2"><i class="fas fa-trash"></i></a></td>{% endif %}</tr>{% endfor %}
+                                </tbody></table></div>{% else %}<p class="text-muted text-center mt-3">Kayıtlı aidat detayı bulunmamaktadır.</p>{% endif %}
                             </div>
                         </div>
                     </div>
-                    {% if can_manage_site_finances %} {# Sadece yönetici gider ekleyebilsin diye sağda form #}
-                    <div class="col-md-4 right-form-column">
-                        {% if gider_ekle_form %}
-                        <div class="action-form-card">
-                            <h5>Gider Girişi</h5>
-                            <form method="post" enctype="multipart/form-data"> {% csrf_token %}
-                                <input type="hidden" name="gider_ekle" value="1">
-                                {% for field in gider_ekle_form %}
-                                <div class="mb-2">
-                                    <label for="id_side_{{ field.html_name }}" class="form-label form-label-sm">{{ field.label }}</label>
-                                    {{ field }}
-                                    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-                                </div>
-                                {% endfor %}
-                                <button type="submit" class="btn btn-panel-theme w-100 mt-2">Gideri Kaydet</button>
-                            </form>
-                        </div>
-                        {% endif %}
-                         {# Eğer sağda ayrı bir aidat ekleme formu da isteniyorsa buraya eklenebilir #}
-                         {# {% if aidat_ekle_form %} ... {% endif %} #}
-                    </div>
-                    {% endif %}
                 </div>
-            </div>
-        </div>
-    </div>
+            </div> </div> </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -336,17 +274,45 @@
         var hash = window.location.hash;
         if (hash) {
             var tabToActivate = document.querySelector('.nav-tabs-panel button[data-bs-target="' + hash + '"]');
-            if (tabToActivate) { (new bootstrap.Tab(tabToActivate)).show(); }
+            if (tabToActivate) { try { (new bootstrap.Tab(tabToActivate)).show(); } catch(e){}}
         }
         document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(function (tabElm) {
-            tabElm.addEventListener('shown.bs.tab', function (event) { history.replaceState(null, null, event.target.dataset.bsTarget); });
+            tabElm.addEventListener('shown.bs.tab', function (event) {
+                if(history.replaceState) { history.replaceState(null, null, event.target.dataset.bsTarget); }
+                else { window.location.hash = event.target.dataset.bsTarget; }
+            });
         });
         document.querySelectorAll('.fixed-bottom-messages .alert').forEach(function(el) {
             setTimeout(function() {
-                var instance = bootstrap.Alert.getInstance(el);
-                if (instance) { instance.close(); } else if (el.classList.contains('show')) { el.classList.remove('show'); }
+                try{ var instance = bootstrap.Alert.getInstance(el); if (instance) { instance.close(); } else if (el.classList.contains('show')) { el.classList.remove('show'); }} catch(e) { if (el.classList.contains('show')) { el.classList.remove('show'); }}
             }, 5000);
         });
+
+        const kayitTuruSelect = document.getElementById('kayitTuruSelect');
+        const aidatFieldsContainer = document.getElementById('aidatFieldsContainer');
+        const giderFieldsContainer = document.getElementById('giderFieldsContainer');
+        const kullaniciYoneticiMi = {{ request.user.is_yonetici|yesno:"true,false" }}; 
+
+        function toggleEntryFields() {
+            if (kullaniciYoneticiMi && kayitTuruSelect) { 
+                if (kayitTuruSelect.value === 'gider') {
+                    if(aidatFieldsContainer) aidatFieldsContainer.style.display = 'none';
+                    if(giderFieldsContainer) giderFieldsContainer.style.display = 'block';
+                } else { 
+                    if(aidatFieldsContainer) aidatFieldsContainer.style.display = 'block';
+                    if(giderFieldsContainer) giderFieldsContainer.style.display = 'none';
+                }
+            } else if (!kullaniciYoneticiMi) { 
+                 if(aidatFieldsContainer) aidatFieldsContainer.style.display = 'block';
+                 if(giderFieldsContainer) giderFieldsContainer.style.display = 'none';
+                 if(kayitTuruSelect) kayitTuruSelect.style.display = 'none'; 
+            }
+        }
+
+        if (kayitTuruSelect) {
+            kayitTuruSelect.addEventListener('change', toggleEntryFields);
+        }
+        toggleEntryFields();
     });
     </script>
 </body>

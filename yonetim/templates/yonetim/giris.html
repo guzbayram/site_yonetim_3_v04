@@ -1,201 +1,159 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Giriş Yap</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <style>
-      body {
-        background: #6c63ff;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0; /* Body'nin varsayılan margin'ini sıfırlamak iyi bir pratiktir */
-        padding: 15px; /* Küçük ekranlarda kenarlara yapışmayı önlemek için padding */
-        box-sizing: border-box;
-      }
-      .login-container {
-        max-width: 450px;
-        margin-left: auto; /* .col-md-6 içinde ortalamak için */
-        margin-right: auto; /* .col-md-6 içinde ortalamak için */
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-        width: 100%; /* Sütunun genişliğine yayılmasını sağlar, max-width ile sınırlanır */
-      }
-      .login-title {
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 25px;
-        color: #333;
-      }
-      .form-label {
-        font-weight: 500;
-      }
-      .btn-primary {
-        background-color: #6c63ff;
-        border-color: #6c63ff;
-      }
-      .btn-primary:hover,
-      .btn-primary:focus {
-        background-color: #574fd6;
-        border-color: #574fd6;
-      }
-      a {
-        color: #6c63ff;
-      }
-      a:hover {
-        color: #574fd6;
-      }
-      .app-title { /* Başlık için ayrı bir sınıf tanımlamak daha iyi olabilir */
-        color: #fff;
-        font-size: 2.8rem;
-        font-weight: 700;
-        line-height: 1.2;
-        text-align: center; /* Başlık metnini kendi sütununda ortalar */
-      }
-
-      /* Mobil cihazlar için ek ayar (isteğe bağlı) */
-      @media (max-width: 767.98px) {
-        .app-title {
-          margin-bottom: 32px; /* Form ile başlık arasına mobilde boşluk ekler */
-          font-size: 2.2rem; /* Mobilde başlığı biraz küçültebiliriz */
-        }
-        .row > [class*="col-"] { /* Mobilde sütunların tam genişlikte olmasını sağlar */
-            padding-left: 0;
-            padding-right: 0;
-        }
-        .login-container {
-            max-width: 100%; /* Mobilde formun kenarlara yayılması için */
-        }
-      }
+      body { background: #6c63ff; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; padding: 15px; box-sizing: border-box; }
+      .login-container { max-width: 450px; margin-left: auto; margin-right: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); padding: 30px; width: 100%; }
+      .login-title { font-weight: 600; text-align: center; margin-bottom: 25px; color: #333; }
+      .form-label { font-weight: 500; }
+      .btn-primary { background-color: #6c63ff; border-color: #6c63ff; }
+      .btn-primary:hover, .btn-primary:focus { background-color: #574fd6; border-color: #574fd6; }
+      a { color: #6c63ff; } a:hover { color: #574fd6; }
+      .app-title { color: #fff; font-size: 2.8rem; font-weight: 700; line-height: 1.2; text-align: center; }
+      .select-loading::after { content: ""; display: inline-block; width: 1rem; height: 1rem; border: .2em solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spinner-border .75s linear infinite; vertical-align: text-bottom; margin-left: 5px; }
+      @keyframes spinner-border { to { transform: rotate(360deg); } }
+      @media (max-width: 767.98px) { .app-title { margin-bottom: 32px; font-size: 2.2rem; } .row > [class*="col-"] { padding-left: 0; padding-right: 0; } .login-container { max-width: 100%; } }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="row align-items-center justify-content-center">
-        <div class="col-md-6 mb-4 mb-md-0">
-          <h1 class="app-title">
-            Site ve Apartman<br />Yönetim<br />Uygulaması
-          </h1>
-        </div>
-
+        <div class="col-md-6 mb-4 mb-md-0"> <h1 class="app-title"> Site ve Apartman<br />Yönetim<br />Uygulaması </h1> </div>
         <div class="col-md-6">
           <div class="login-container">
-            <h2 class="login-title">Site Yönetim Sistemi Giriş</h2>
-
-            {% if messages %}
-              {% for message in messages %}
-            <div
-              class="alert alert-{{ message.tags }} alert-dismissible fade show"
-              role="alert"
-            >
-              {{ message }}
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-              ></button>
-            </div>
-              {% endfor %}
-            {% endif %}
-
-            <form method="post">
+            <h2 class="login-title">Sistem Girişi</h2>
+            {% if messages %} {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+              {{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div> {% endfor %} {% endif %}
+            <form method="post" id="girisForm">
               {% csrf_token %}
+              <div class="mb-3"> <label for="first_name" class="form-label">Ad</label> <input type="text" name="first_name" id="first_name" class="form-control" required value="{{ form_data.first_name|default:'' }}" autocomplete="given-name"/> </div>
+              <div class="mb-3"> <label for="last_name" class="form-label">Soyad</label> <input type="text" name="last_name" id="last_name" class="form-control" required value="{{ form_data.last_name|default:'' }}" autocomplete="family-name"/> </div>
+              <div class="mb-3"> <label for="site_kodu_giris" class="form-label">Site Kodu</label> <input type="text" name="site_kodu" id="site_kodu_giris" class="form-control" required maxlength="3" value="{{ form_data.site_kodu|default:'' }}" autocomplete="off" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');"/> </div>
+              
               <div class="mb-3">
-                <label for="first_name" class="form-label">Ad</label>
-                <input
-                  type="text"
-                  name="first_name"
-                  id="first_name"
-                  class="form-control"
-                  required
-                  value="{{ request.POST.first_name|default:'' }}"
-                  autocomplete="off"
-                />
+                <label for="blok_id_giris" class="form-label">Blok Adı</label>
+                <select name="blok_id_giris" id="blok_id_giris" class="form-select" required>
+                    <option value="">{% if form_data.site_kodu %}Site Kodu Girildi, Blok Seçin{% else %}Önce Site Kodu Girin{% endif %}</option>
+                    {% if form_data.blok_options_giris %}
+                        {% for blok_opt in form_data.blok_options_giris %}
+                            <option value="{{ blok_opt.id }}" {% if blok_opt.id|stringformat:"s" == form_data.secili_blok_id_giris|stringformat:"s" %}selected{% endif %}>{{ blok_opt.ad }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
               </div>
               <div class="mb-3">
-                <label for="last_name" class="form-label">Soyad</label>
-                <input
-                  type="text"
-                  name="last_name"
-                  id="last_name"
-                  class="form-control"
-                  required
-                  value="{{ request.POST.last_name|default:'' }}"
-                  autocomplete="off"
-                />
+                <label for="daire_id_giris" class="form-label">Daire No</label>
+                <select name="daire_id_giris" id="daire_id_giris" class="form-select" required>
+                     <option value="">{% if form_data.secili_blok_id_giris %}Blok Seçildi, Daire Seçin{% else %}Önce Blok Seçin{% endif %}</option>
+                    {% if form_data.daire_options_giris %}
+                        {% for daire_opt in form_data.daire_options_giris %}
+                            <option value="{{ daire_opt.id }}" {% if daire_opt.id|stringformat:"s" == form_data.secili_daire_id_giris|stringformat:"s" %}selected{% endif %}>{{ daire_opt.no }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
               </div>
-              <div class="mb-3">
-                <label for="site_kodu" class="form-label">Site Kodu</label>
-                <input
-                  type="text"
-                  name="site_kodu"
-                  id="site_kodu"
-                  class="form-control"
-                  required
-                  maxlength="3"
-                  value="{{ request.POST.site_kodu|default:'' }}"
-                  autocomplete="off"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="blok_adi" class="form-label">Blok Adı</label>
-                <input
-                  type="text"
-                  name="blok_adi"
-                  id="blok_adi"
-                  class="form-control"
-                  required
-                  value="{{ request.POST.blok_adi|default:'' }}"
-                  autocomplete="off"
-                  style="text-transform: uppercase"
-                  oninput="this.value = this.value.toUpperCase();"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="daire_no" class="form-label">Daire No</label>
-                <input
-                  type="text"
-                  name="daire_no"
-                  id="daire_no"
-                  class="form-control"
-                  required
-                  value="{{ request.POST.daire_no|default:'' }}"
-                  autocomplete="off"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="password" class="form-label">Parola</label>
-                <input
-                  type="password"
-                  name="password"
-                  id="password"
-                  class="form-control"
-                  required
-                  autocomplete="off"
-                />
-              </div>
-              <button type="submit" class="btn btn-primary w-100">
-                GİRİŞ YAP
-              </button>
+              <div class="mb-3"> <label for="password" class="form-label">Parola</label> <input type="password" name="password" id="password" class="form-control" required autocomplete="current-password"/> </div>
+              <button type="submit" class="btn btn-primary w-100"> GİRİŞ YAP </button>
             </form>
-            <div class="text-center mt-3">
-              <span>Hesabınız yok mu?
-                <a href="{% url 'yonetim:kayit' %}">Kayıt Olun</a>
-              </span>
-            </div>
+            <div class="text-center mt-3"> <span>Hesabınız yok mu? <a href="{% url 'yonetim:kayit' %}">Kayıt Olun</a> </span> </div>
           </div>
         </div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const siteKoduInputGiris = document.getElementById("site_kodu_giris");
+            const blokSelectGiris = document.getElementById("blok_id_giris");
+            const daireSelectGiris = document.getElementById("daire_id_giris");
+
+            function setLoadingState(selectElement, isLoading, defaultMessage) {
+                const firstOption = selectElement.querySelector('option[value=""]');
+                if (isLoading) {
+                    selectElement.classList.add("select-loading");
+                    if(firstOption) firstOption.textContent = "Yükleniyor...";
+                } else {
+                    selectElement.classList.remove("select-loading");
+                    if (firstOption && (firstOption.textContent === "Yükleniyor..." || selectElement.options.length <=1)) {
+                         firstOption.textContent = defaultMessage;
+                    }
+                }
+            }
+
+            siteKoduInputGiris.addEventListener("input", function () {
+                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                blokSelectGiris.innerHTML = '<option value="">Site Kodu Giriliyor...</option>';
+                daireSelectGiris.innerHTML = '<option value="">Önce Blok Seçin</option>';
+                setLoadingState(blokSelectGiris, false, "Önce Site Kodu Girin");
+                setLoadingState(daireSelectGiris, false, "Önce Blok Seçin");
+                if (this.value.trim().length === 3) { fetchBloklarGiris(); }
+                else { blokSelectGiris.innerHTML = '<option value="">Geçerli Site Kodu Girin (3 krk)</option>';}
+            });
+
+            blokSelectGiris.addEventListener("change", fetchDairelerGiris);
+
+            function fetchBloklarGiris() {
+                const siteKodu = siteKoduInputGiris.value.trim();
+                const url = `{% url 'yonetim:ajax_bloklar' %}?site_kodu=${siteKodu}`;
+                setLoadingState(blokSelectGiris, true);
+                daireSelectGiris.innerHTML = '<option value="">Önce Blok Seçin</option>';
+                setLoadingState(daireSelectGiris, false, "Önce Blok Seçin");
+
+                if (siteKodu.length === 3) {
+                    fetch(url)
+                        .then(response => { if (!response.ok) { return response.json().then(err => { throw new Error(err.error || "Bloklar alınamadı.");});} return response.json();})
+                        .then(data => {
+                            setLoadingState(blokSelectGiris, false, "Blok Seçin");
+                            if (data.error) { blokSelectGiris.innerHTML = `<option value="">${data.error}</option>`; return; }
+                            blokSelectGiris.innerHTML = '<option value="">Blok Seçin</option>';
+                            if (data.bloklar && data.bloklar.length > 0) {
+                                data.bloklar.forEach(blok => { blokSelectGiris.innerHTML += `<option value="${blok.id}">${blok.ad}</option>`; });
+                            } else { blokSelectGiris.innerHTML = `<option value="">${data.message || 'Blok bulunamadı.'}</option>`;}
+                        })
+                        .catch(error => { console.error("Blok fetch hatası:", error); setLoadingState(blokSelectGiris, false, "Blok yüklenemedi"); blokSelectGiris.innerHTML = `<option value="">Hata: ${error.message}</option>`; });
+                } else { setLoadingState(blokSelectGiris, false, "Geçerli Site Kodu (3 krk)"); blokSelectGiris.innerHTML = '<option value="">Geçerli Site Kodu (3 krk)</option>';}
+            }
+
+            function fetchDairelerGiris() {
+                const blokId = blokSelectGiris.value;
+                const url = `{% url 'yonetim:ajax_daireler' %}?blok_id=${blokId}&list_all=true`; // Tüm daireleri listele
+                setLoadingState(daireSelectGiris, true);
+
+                if (blokId) {
+                    fetch(url)
+                        .then(response => { if (!response.ok) { return response.json().then(err => { throw new Error(err.error || "Daireler alınamadı.");});} return response.json();})
+                        .then(data => {
+                            setLoadingState(daireSelectGiris, false, "Daire Seçin");
+                            if (data.error) { daireSelectGiris.innerHTML = `<option value="">${data.error}</option>`; return; }
+                            daireSelectGiris.innerHTML = '<option value="">Daire Seçin</option>';
+                            if (data.daireler && data.daireler.length > 0) {
+                                data.daireler.forEach(daire => { daireSelectGiris.innerHTML += `<option value="${daire.id}">${daire.no}</option>`; });
+                            } else { daireSelectGiris.innerHTML = `<option value="">${data.message || 'Daire bulunamadı.'}</option>`;}
+                        })
+                        .catch(error => { console.error("Daire fetch hatası:", error); setLoadingState(daireSelectGiris, false, "Daire yüklenemedi"); daireSelectGiris.innerHTML = `<option value="">Hata: ${error.message}</option>`; });
+                } else { setLoadingState(daireSelectGiris, false, "Önce Blok Seçin"); daireSelectGiris.innerHTML = '<option value="">Önce Blok Seçin</option>';}
+            }
+            // Sayfa ilk yüklendiğinde form_data'dan gelen değerler varsa dropdown'ları tetikle
+            if (siteKoduInputGiris.value.trim().length === 3) {
+                fetchBloklarGiris().then(() => { // Bloklar yüklendikten sonra
+                    if (blokSelectGiris.value && "{{ form_data.secili_blok_id_giris }}") { // Eğer önceden seçili blok varsa
+                         blokSelectGiris.value = "{{ form_data.secili_blok_id_giris }}"; // Seçili yap
+                         return fetchDairelerGiris(); // Daireleri yükle
+                    }
+                }).then(() => {
+                    if (daireSelectGiris.value && "{{ form_data.secili_daire_id_giris }}") { // Önceden seçili daire varsa
+                        daireSelectGiris.value = "{{ form_data.secili_daire_id_giris }}"; // Seçili yap
+                    }
+                }).catch(err => console.warn("Giriş sayfası ilk yükleme dropdown hatası:", err));
+            }
+        });
+    </script>
   </body>
 </html>

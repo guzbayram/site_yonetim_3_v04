@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Giriş sayfasındaki ana tema rengi (#6c63ff) ile uyumlu stil */
-        body { background-color: #f4feff; font-family: "Segoe UI", sans-serif; padding-top: 20px; padding-bottom: 40px; }
+        body { background-color: #6c63ff; font-family: "Segoe UI", sans-serif; padding-top: 20px; padding-bottom: 40px; }
         .site-info-container { max-width: 850px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 25px 35px; }
         .site-title-display { font-weight: 600; text-align: center; margin-bottom: 30px; color: #343a40; font-size: 1.9rem; }
         .form-label { font-weight: 500; color: #495057; font-size: 0.9rem; margin-bottom: 0.3rem; }
@@ -100,7 +100,7 @@
                          <span class="badge bg-warning text-dark ms-2">Sitede size atanabilecek boş daire bulunmamaktadır.</span>
                     {% endif %}
                 </label>
-                <select name="yonetici_daire_secimi" id="yonetici_daire_secimi" class="form-select" {% if is_read_only or (not sitedeki_bos_ve_yoneticiye_ait_daireler and not yoneticinin_mevcut_dairesi_id) %}disabled{% endif %}>
+                <select name="yonetici_daire_secimi" id="yonetici_daire_secimi" class="form-select" {% if is_read_only or not sitedeki_bos_ve_yoneticiye_ait_daireler and not yoneticinin_mevcut_dairesi_id %}disabled{% endif %}>
                     <option value="bos_birak">-- Daire Atamasını Kaldır / Daire Seçme --</option>
                     {% for daire_secim in sitedeki_bos_ve_yoneticiye_ait_daireler %}
                         <option value="{{ daire_secim.id }}" {% if daire_secim.id == yoneticinin_mevcut_dairesi_id %}selected{% endif %}>
@@ -179,9 +179,12 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   
     {% if not is_read_only %} {# JavaScript sadece düzenleme modunda gerekli #}
+    
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
             function updateBlokAdInput(inputElement) {
                 if (inputElement && inputElement.name === 'blok_adi[]') {
                     inputElement.value = inputElement.value.toUpperCase();
