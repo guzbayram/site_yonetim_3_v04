@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "yonetim",  # Site yönetim uygulaması / Site management app
     'django.contrib.humanize',
+    'whatsapp_messaging',  # Yeni WhatsApp uygulaması
 ]
 
 MIDDLEWARE = [
@@ -143,3 +144,17 @@ AUTH_USER_MODEL = "yonetim.Kullanici"
 LOGIN_URL = '/giris/' # VEYA '/yonetim/giris/' (ana urls.py'deki include yapınıza göre)
 LOGIN_REDIRECT_URL = '/panel/'
 LOGOUT_REDIRECT_URL = '/giris/'
+
+# WhatsApp ve Twilio Ayarları
+TWILIO_ACCOUNT_SID = 'your_account_sid'  # .env dosyasından alınacak
+TWILIO_AUTH_TOKEN = 'your_auth_token'    # .env dosyasından alınacak
+TWILIO_WHATSAPP_NUMBER = 'whatsapp:+14155238886'  # Twilio WhatsApp numarası
+SITE_WHATSAPP_GROUP = 'your_group_id'    # Site WhatsApp grubu ID'si
+
+# Celery Ayarları
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Istanbul'
