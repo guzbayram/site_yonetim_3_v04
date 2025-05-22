@@ -2,7 +2,6 @@ from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
 from .services import WhatsAppService
-from yonetim.models import Daire, Aidat  # Mevcut modellerinize göre import edin
 
 @shared_task
 def check_and_send_debt_reminders():
@@ -10,6 +9,9 @@ def check_and_send_debt_reminders():
     Borçlu daireleri kontrol et ve hatırlatma gönder
     Check indebted apartments and send reminders
     """
+    # Import'ları fonksiyon içine taşıyoruz / Move imports inside the function
+    from yonetim.models import Daire, Aidat
+    
     whatsapp_service = WhatsAppService()
     today = timezone.now().date()
     
@@ -42,13 +44,14 @@ def send_payment_notification(payment_id):
     Ödeme bildirimi gönder
     Send payment notification
     """
-    from yonetim.models import Odeme  # Mevcut modellerinize göre import edin
+    # Import'u fonksiyon içine taşıyoruz / Move import inside the function
+    from yonetim.models import Aidat
     whatsapp_service = WhatsAppService()
     
     try:
-        payment = Odeme.objects.get(id=payment_id)
+        payment = Aidat.objects.get(id=payment_id)
         whatsapp_service.send_payment_notification(payment)
-    except Odeme.DoesNotExist:
+    except Aidat.DoesNotExist:
         return f"Ödeme bulunamadı: {payment_id}"
     except Exception as e:
         return f"Ödeme bildirimi gönderme hatası: {str(e)}"
@@ -59,7 +62,8 @@ def send_expense_notification(expense_id):
     Gider bildirimi gönder
     Send expense notification
     """
-    from yonetim.models import Gider  # Mevcut modellerinize göre import edin
+    # Import'u fonksiyon içine taşıyoruz / Move import inside the function
+    from yonetim.models import Gider
     whatsapp_service = WhatsAppService()
     
     try:
